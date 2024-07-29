@@ -1,0 +1,7 @@
+@if (isLoading$ | async) {
+<div>Loading...</div>
+} @else { @for (company of listOfAssets$ | async; track company) {
+<div>{{ company | json }}</div>
+} @empty {
+<div>No company found...</div>
+} }
