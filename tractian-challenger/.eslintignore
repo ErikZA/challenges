@@ -1,0 +1,8 @@
+package.json
+package-lock.json
+dist
+e2e/**
+commitlint.config.js
+
+
+**/node_modules/**
