@@ -1,10 +1,12 @@
 {
   "name": "tractian-challenger",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:production": "ng build --configuration production",
+    "build:development": "ng build --configuration development",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
