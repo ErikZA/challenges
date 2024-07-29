@@ -8,7 +8,10 @@
     "build:production": "ng build --configuration production",
     "build:development": "ng build --configuration development",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "lint": "eslint \"src/**/*.ts\" --quiet --fix",
+    "format": "npx prettier \"src/**/*.{js,jsx,ts,tsx,html,css,scss}\" --write",
+    "prepare": "husky install"
   },
   "private": true,
   "dependencies": {
