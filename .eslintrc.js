@@ -42,7 +42,6 @@ module.exports = {
     'prettier/prettier': ['error', { endOfLine: 'auto' }],
     semi: [2, 'always'],
     'no-relative-import-paths/no-relative-import-paths': ['warn', { allowSameFolder: true }],
-    'import/no-unresolved': 'error',
     '@typescript-eslint/interface-name-prefix': 'off',
     '@typescript-eslint/explicit-function-return-type': 0,
     '@typescript-eslint/explicit-module-boundary-types': 'off',
