@@ -15,11 +15,8 @@ export type Locations = Array<Pick<Asset, 'id' | 'name' | 'parentId'>>;
 
 export type Assets = Array<Asset>;
 
-export type TreeOfAssets = Array<{
-  company: Companies[0];
-  children: Array<{
-    company: TreeOfAssets[0];
-    location: Locations[0];
-    children: Array<Asset>;
-  }>;
-}>;
+export type NodeAsset = Partial<Asset> & { children: TreeOfAssets };
+
+export interface TreeOfAssets {
+  [key: string]: NodeAsset;
+}
