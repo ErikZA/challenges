@@ -3,6 +3,7 @@ package-lock.json
 dist
 e2e/**
 commitlint.config.js
+tailwind.config.js
 
 
 **/node_modules/**

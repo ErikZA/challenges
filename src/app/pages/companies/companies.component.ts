@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { CompaniesService } from '@app/shared/services/companies';
 
 import { map } from 'rxjs';
@@ -17,14 +23,11 @@ export class CompaniesComponent implements OnInit {
   public selectedCompany = signal<string | null>(null);
 
   public async ngOnInit() {
-    console.log('jeusus - 1');
-    this.companiesService.loadTreeOfAssets();
-    console.log('jeusus - 2');
-    this.companiesService.onLoadLocationsByCompanyId();
-    console.log('jeusus - 3');
-    this.listOfAssets$.subscribe(list => {
-      console.log('jeusus', list);
-    });
+    // this.companiesService.onLoadLocationsByCompanyId();
+    // this.companiesService.onLoadAssetsByCompanyId();
+    // this.isLoading$.subscribe(assets => {
+    //   this.listOfAssets$.subscribe(assets => console.log(assets));
+    // });
   }
 
   public get isLoading$() {

@@ -3,10 +3,10 @@
 @tailwind components;
 @tailwind utilities;
 
-
 /* Absolute Center Spinner */
 .loading {
-  font-size:48px;color:#2188FF;
+  font-size: 48px;
+  color: #2188ff;
   position: fixed;
   z-index: 999;
   height: 2em;
