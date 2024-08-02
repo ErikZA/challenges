@@ -1,0 +1,17 @@
+:host {
+  display: block;
+
+  svg-icon {
+    svg {
+      fill: var(--custom-color-primary, #007bff) !important;
+
+      path {
+        fill: var(--custom-color-primary, #007bff) !important;
+      }
+    }
+  }
+
+  i {
+    color: var(--custom-color-primary, #007bff);
+  }
+}

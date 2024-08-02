@@ -58,7 +58,7 @@ export class CompaniesService {
   public onLoadLocationsByCompanyId() {
     this.isLoading$.next(true);
     this.listCompanies$.pipe(distinctUntilChanged()).subscribe(companies => {
-      const keys = Object.keys(companies).slice(2, 3);
+      const keys = Object.keys(companies);
 
       for (const key of keys) {
         this.getLocationsByCompanyId(key)
@@ -79,7 +79,7 @@ export class CompaniesService {
   public onLoadAssetsByCompanyId() {
     this.isLoading$.next(true);
     this.listCompanies$.pipe(distinctUntilChanged()).subscribe(companies => {
-      const keys = Object.keys(companies).slice(2, 3);
+      const keys = Object.keys(companies);
 
       for (const key of keys) {
         this.getAssetsByCompanyId(key)
@@ -93,7 +93,8 @@ export class CompaniesService {
 
             this.populateSensorsWithoutLocation(
               sensorWithoutLocation,
-              companies
+              companies,
+              key
             );
 
             this.populateLocationAssets(assetsWithLocation, companies, key);
@@ -179,6 +180,10 @@ export class CompaniesService {
       });
 
       node[asset.id] = { ...asset, children: {}, type };
+
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -200,10 +205,11 @@ export class CompaniesService {
 
   private populateSensorsWithoutLocation(
     assets: Assets,
-    companies: TreeOfAssets
+    companies: TreeOfAssets,
+    key: string
   ) {
     assets.forEach(sensor => {
-      companies[sensor.id] = {
+      companies[key].children[sensor.id] = {
         ...sensor,
         children: {},
         type: 'SENSOR',
@@ -217,39 +223,34 @@ export class CompaniesService {
     key: string
   ) {
     const subLocationsWithoutParent = [] as Locations;
+    let node = companies[key];
 
     subLocations.forEach(company => {
-      if (companies[key].children[company.parentId as string]) {
-        companies[key].children[company.parentId as string].children[
-          company.id
-        ] = { ...company, children: {}, type: 'SUB-LOCATION' };
+      if (node.children[company.parentId as string]) {
+        node.children[company.parentId as string].children[company.id] = {
+          ...company,
+          children: {},
+          type: 'SUB-LOCATION',
+        };
+        node = node.children[company.parentId as string];
       } else {
-        subLocationsWithoutParent.push(company);
+        const res = this.populateNode(
+          companies,
+          key,
+          company as Asset,
+          company.parentId as string,
+          'SUB-LOCATION'
+        );
+
+        if (!res) {
+          subLocationsWithoutParent.push(company);
+        }
       }
     });
 
-    if (subLocationsWithoutParent.length)
-      this.processUnknownLocations(subLocationsWithoutParent, companies);
-  }
-
-  private processUnknownLocations(
-    subLocationsWithoutParent: Locations,
-    companies: TreeOfAssets
-  ) {
-    const { locations, subLocations } = this.categorizeLocations(
-      subLocationsWithoutParent
-    );
-
-    companies['unknown'] = {
-      id: 'unknown',
-      name: 'unknown',
-      children: {},
-      type: 'LOCATION',
-    };
-
-    this.populateLocations(locations, companies, 'unknown');
-
-    this.populateSubLocations(subLocations, companies, 'unknown');
+    if (subLocationsWithoutParent.length) {
+      this.populateSubLocations(subLocationsWithoutParent, companies, key);
+    }
   }
 
   private populateLocations(

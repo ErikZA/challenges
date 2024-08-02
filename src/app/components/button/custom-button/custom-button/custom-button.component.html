@@ -1,0 +1,12 @@
+<button
+  type="button"
+  (click)="onClick.emit()"
+  [disabled]="disabled"
+  [class]="joinedStyles">
+  @if (customIcon) {
+  <svg-icon class="text-sm mr-1" [src]="customIcon"></svg-icon>
+  } @else if(icon) {
+  <i [class]="icon" class="text-sm mr-1" aria-hidden="true"></i>
+  }
+  {{ text }}
+</button>

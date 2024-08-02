@@ -25,7 +25,7 @@ export class NavBarComponent {
 
   private onGetActiveMenu() {
     this.router.events.subscribe(() => {
-      this.activeMenu = this.router.url;
+      this.activeMenu = this.router.url.slice(1);
     });
   }
 
@@ -35,8 +35,8 @@ export class NavBarComponent {
     });
   }
 
-  public setActiveMenu(menu: string) {
-    this.activeMenu = menu;
+  public setActiveMenu(link: string) {
+    this.activeMenu = link;
   }
 
   public toggleNavbar() {

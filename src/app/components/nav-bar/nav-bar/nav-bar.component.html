@@ -2,7 +2,7 @@
   <div
     class="max-w-screen flex flex-wrap items-center justify-between mx-auto p-4">
     <a href="#" class="flex items-center space-x-3 rtl:space-x-reverse">
-      <img src="images/logo.svg" class="h-4" alt="Tractian Logo" />
+      <img src="assets/logo.svg" class="h-4" alt="Tractian Logo" />
     </a>
     <button
       data-collapse-toggle="navbar-solid-bg"
@@ -12,19 +12,7 @@
       (click)="toggleNavbar()"
       aria-expanded="false">
       <span class="sr-only">Open main menu</span>
-      <svg
-        class="w-5 h-5"
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 17 14">
-        <path
-          stroke="currentColor"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M1 1h15M1 7h15M1 13h15" />
-      </svg>
+      <i class="fa fa-bars" aria-hidden="true"></i>
     </button>
     <div
       [class.hidden]="isNavbarCollapsed"
@@ -38,12 +26,12 @@
             (click)="setActiveMenu(menu.link)"
             [routerLink]="menu.link"
             [ngClass]="activeMenu === menu.link ? 'bg-darkBlue-300' : ''"
-            class="flex rounded-sm smx:mb-2 text-xs w-full md:w-28 md:justify-around md:justify-items-center text-center px-2 py-2.5 font-inter rounded bg-darkBlue-200 hover:bg-darkBlue-300 text-gray-50"
+            class="flex rounded-sm smx:mb-2 text-sm w-full md:w-28 md:justify-around md:justify-items-center text-center px-2 py-1 font-inter rounded bg-darkBlue-200 hover:bg-darkBlue-300 text-gray-50"
             aria-current="page"
             ><img
-              src="images/unit.svg"
-              class="text-xs smx:mr-2"
-              alt="Tractian Logo" />
+              src="assets/unit.svg"
+              class="text-sm smx:mr-2"
+              alt="Company name" />
             {{ menu.title }} Unit</a
           >
         </li>

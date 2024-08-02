@@ -3,11 +3,10 @@ import {
   ChangeDetectorRef,
   Component,
   inject,
-  Input,
   OnDestroy,
   OnInit,
-  TemplateRef,
 } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 import { NavBarComponent } from '@app/components/nav-bar/nav-bar/nav-bar.component';
 import { TreeOfAssets } from '@app/shared/interfaces/companies';
 import { MenuItems } from '@app/shared/interfaces/core/menu.interface';
@@ -19,12 +18,11 @@ import { map } from 'rxjs';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, NavBarComponent],
+  imports: [CommonModule, NavBarComponent, RouterOutlet],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  @Input() public childTemplate!: Required<TemplateRef<unknown>>;
   private companiesService = inject(CompaniesService);
   private changeRef = inject(ChangeDetectorRef);
 
