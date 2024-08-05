@@ -1,0 +1,26 @@
+<section class="flex row justify-between items-baseline px-2 py-1">
+  <div class="flex row items-baseline">
+    <h1 class="h-5 text-xl font-bold text-gray-850">Ativos</h1>
+    <h3 class="h-3 text-sm font-medium text-gray-550">
+      &nbsp;&nbsp;/&nbsp;{{ title }} Unit
+    </h3>
+  </div>
+  <div class="flex row items-baseline">
+    <app-custom-button
+      text="Sensor de Energia"
+      class="mr-2"
+      [class.active]="filterEnergySensorActive()"
+      [styles]="filterEnergySensorActive() ? activeStyle : 'hover:bg-gray-300'"
+      customIcon="assets/volt.svg"
+      (onClick)="onClickFilterEnergySensor()"></app-custom-button>
+
+    <app-custom-button
+      text="Crítico"
+      [styles]="
+        filterCriticalSensorActive() ? activeStyle : 'hover:bg-gray-300'
+      "
+      [class.active]="filterCriticalSensorActive()"
+      customIcon="assets/point.svg"
+      (onClick)="onClickFilterCriticalSensor()"></app-custom-button>
+  </div>
+</section>

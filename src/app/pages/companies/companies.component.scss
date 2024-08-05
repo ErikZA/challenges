@@ -1,7 +1,8 @@
 :host {
   display: block;
 
-  app-custom-button.active {
-    --custom-color-primary: white
+  .container__height {
+    height: 80vh !important;
+    overflow: auto;
   }
 }

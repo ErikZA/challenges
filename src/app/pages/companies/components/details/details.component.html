@@ -1,0 +1,47 @@
+<div class="flex-col items-center justify-between py-3 w-full h-max">
+  <h1
+    class="flex items-center text-lg font-bold border-b border-b-gray-350 px-3 pb-3 font-inter text-gray-900">
+    Filter by: <svg-icon class="text-base ml-2" [src]="customIcon"></svg-icon>
+  </h1>
+  <div class="flex justify-between px-3 pt-4 pb-2">
+    <div class="w-5/12 justify-start">
+      <app-image-input></app-image-input>
+    </div>
+    <div class="flex flex-col w-7/12 justify-center ml-8">
+      <p class="text-base font-bold font-inter text-gray-900">
+        Tipo de Equipamento
+      </p>
+      <p class="flex text-base font-medium font-inter text-gray-650 pt-2">
+        MOCKED
+      </p>
+
+      <div class="border-t border-t-gray-350 w-full my-8"></div>
+      <p class="text-base font-bold font-inter text-gray-900">Responsáveis</p>
+      <p
+        class="flex items-center text-base font-medium font-inter text-gray-650 pt-2">
+        <span
+          class="mr-2 p bg-darkBlue-200 text-gray-50 w-6 pt-px text-center rounded-2xl">
+          {{ customLocation }}
+        </span>
+        MOCKED
+      </p>
+    </div>
+  </div>
+  <div class="flex mt-4">
+    <div class="border-t border-t-gray-350 w-full mx-3"></div>
+  </div>
+  <div class="flex justify-between px-3 pt-4">
+    @for(info of assetDataInfo; track info.name;) {
+    <div class="w-3/6 justify-start">
+      <p class="text-base font-bold font-inter text-gray-900">
+        {{ info.name }}
+      </p>
+      <p
+        class="flex items-center text-base font-medium font-inter text-gray-650 pt-2">
+        <svg-icon class="text-base mr-4" [src]="info.icon"></svg-icon>
+        {{ info.data }}
+      </p>
+    </div>
+    }
+  </div>
+</div>

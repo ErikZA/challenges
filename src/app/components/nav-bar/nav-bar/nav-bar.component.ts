@@ -35,10 +35,6 @@ export class NavBarComponent {
     });
   }
 
-  public setActiveMenu(link: string) {
-    this.activeMenu = link;
-  }
-
   public toggleNavbar() {
     this.isNavbarCollapsed = !this.isNavbarCollapsed;
   }

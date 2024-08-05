@@ -11,16 +11,24 @@ import {
 } from '@app/shared/interfaces/companies';
 import { environment } from '@env/environment';
 
-import { distinctUntilChanged, ReplaySubject } from 'rxjs';
+import {
+  delay,
+  distinctUntilChanged,
+  ReplaySubject,
+  firstValueFrom,
+} from 'rxjs';
+
+import { motorOne, motorThree, motorTwo } from './mock';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CompaniesService {
   private baseUrl = environment.api;
+
   public listCompanies$: ReplaySubject<TreeOfAssets> =
     new ReplaySubject<TreeOfAssets>(1);
-  private listOfLocations$: ReplaySubject<TreeOfAssets> =
+  public listOfLocations$: ReplaySubject<TreeOfAssets> =
     new ReplaySubject<TreeOfAssets>(1);
   public listOfAssets$: ReplaySubject<TreeOfAssets> =
     new ReplaySubject<TreeOfAssets>(1);
@@ -55,59 +63,80 @@ export class CompaniesService {
       .add(() => this.isLoading$.next(false));
   }
 
-  public onLoadLocationsByCompanyId() {
+  public onLoadAssets(key?: string | null) {
+    if (!key) {
+      alert('Please select a company');
+
+      return;
+    }
     this.isLoading$.next(true);
-    this.listCompanies$.pipe(distinctUntilChanged()).subscribe(companies => {
-      const keys = Object.keys(companies);
+    this.onLoadLocationsByCompanyId(key);
+    this.onLoadAssetsByCompanyId(key);
+  }
 
-      for (const key of keys) {
-        this.getLocationsByCompanyId(key)
-          .subscribe(l => {
-            const { locations, subLocations } = this.categorizeLocations(l);
+  private onLoadLocationsByCompanyId(key: string) {
+    this.getLocationsByCompanyId(key).subscribe(l => {
+      this.listCompanies$.subscribe(companies => {
+        const { locations, subLocations } = this.categorizeLocations(l);
 
-            this.populateLocations(locations, companies, key);
+        this.populateLocations(locations, companies, key);
 
-            this.populateSubLocations(subLocations, companies, key);
+        this.populateSubLocations(subLocations, companies, key);
 
-            this.listOfLocations$.next(companies);
-          })
-          .add(() => this.isLoading$.next(false));
-      }
+        this.listOfLocations$.next(companies);
+      });
     });
   }
 
-  public onLoadAssetsByCompanyId() {
+  public async searchMockedAssets(value: string) {
     this.isLoading$.next(true);
-    this.listCompanies$.pipe(distinctUntilChanged()).subscribe(companies => {
-      const keys = Object.keys(companies);
 
-      for (const key of keys) {
-        this.getAssetsByCompanyId(key)
-          .subscribe(assets => {
-            const {
-              sensorWithoutLocation,
-              assetsWithLocation,
-              assetsWithParent,
-              sensorWithLocation,
-            } = this.filterAssets(assets);
+    let result;
 
-            this.populateSensorsWithoutLocation(
-              sensorWithoutLocation,
-              companies,
-              key
-            );
+    if (value.endsWith('a') || value.endsWith('d') || value.endsWith('f')) {
+      result = firstValueFrom(motorOne.pipe(delay(1000)));
+    } else if (
+      value.endsWith('1') ||
+      value.endsWith('2') ||
+      value.endsWith('3')
+    ) {
+      result = firstValueFrom(motorTwo.pipe(delay(2000)));
+    } else {
+      result = firstValueFrom(motorThree.pipe(delay(3000)));
+    }
 
-            this.populateLocationAssets(assetsWithLocation, companies, key);
+    this.isLoading$.next(false);
 
-            this.populateAssetsParents(assetsWithParent, companies, key);
+    return result as unknown as NodeAsset;
+  }
 
-            this.populateSensors(sensorWithLocation, companies, key);
+  private onLoadAssetsByCompanyId(key: string) {
+    this.getAssetsByCompanyId(key)
+      .subscribe(assets => {
+        this.listCompanies$.subscribe(companies => {
+          const {
+            sensorWithoutLocation,
+            assetsWithLocation,
+            assetsWithParent,
+            sensorWithLocation,
+          } = this.filterAssets(assets);
 
-            this.listOfAssets$.next(companies);
-          })
-          .add(() => this.isLoading$.next(false));
-      }
-    });
+          this.populateSensorsWithoutLocation(
+            sensorWithoutLocation,
+            companies,
+            key
+          );
+
+          this.populateLocationAssets(assetsWithLocation, companies, key);
+
+          this.populateAssetsParents(assetsWithParent, companies, key);
+
+          this.populateSensors(sensorWithLocation, companies, key);
+
+          this.listOfAssets$.next(companies);
+        });
+      })
+      .add(() => this.isLoading$.next(false));
   }
 
   private populateSensors(

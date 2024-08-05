@@ -20,13 +20,12 @@
       id="navbar-solid-bg">
       <ul
         class="flex flex-col font-medium mt-4 rounded-lg bg-darkBlue-900 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-transparent">
-        @for (menu of menus; track menu;) {
+        @for (menu of menus; track menu.link;) {
         <li>
           <a
-            (click)="setActiveMenu(menu.link)"
             [routerLink]="menu.link"
             [ngClass]="activeMenu === menu.link ? 'bg-darkBlue-300' : ''"
-            class="flex rounded-sm smx:mb-2 text-sm w-full md:w-28 md:justify-around md:justify-items-center text-center px-2 py-1 font-inter rounded bg-darkBlue-200 hover:bg-darkBlue-300 text-gray-50"
+            class="flex rounded-sm smx:mb-2 text-xs w-full md:w-28 md:justify-around md:justify-items-center text-center smx:px-2 py-1 font-inter rounded bg-darkBlue-200 hover:bg-darkBlue-300 text-gray-50"
             aria-current="page"
             ><img
               src="assets/unit.svg"

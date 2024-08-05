@@ -1,0 +1,34 @@
+<form [formGroup]="form" class="flex">
+  <div class="relative w-full border-b border-b-gray-350 border-solid">
+    <input
+      type="search"
+      id="search-dropdown"
+      [ngClass]="{
+        'border-red-200': hasError,
+        border: hasError
+      }"
+      class="block p-2.5 w-full z-20 text-sm font-medium font-inter text-gray-900 bg-gray-50 pr-8"
+      placeholder="Buscar Ativo ou Local"
+      formControlName="search"
+      required />
+    <button
+      type="submit"
+      class="absolute top-0 end-0 p-2.5 text-sm font-medium h-full text-white hover:bg-gray-300 focus:ring-4">
+      <i class="fa fa-search" aria-hidden="true"></i>
+    </button>
+    <span class="sr-only">Search</span>
+    <span
+      *ngIf="
+        form.controls.search.hasError('required') &&
+        form.controls.search.touched
+      "
+      class="absolute top-15 end-15 text-red-200 text-xs"
+      >Campo obrigatório</span
+    >
+    <span
+      *ngIf="form.controls.search.hasError('minlength')"
+      class="absolute top-15 end-15 text-red-200 text-xs"
+      >Mínimo de 3 caracteres</span
+    >
+  </div>
+</form>

@@ -1,36 +1,17 @@
 <div
-  class="max-w-screen max-h-screen p-6 bg-gray-50 border border-gray-350 mx-2 my-2 rounded-lg shadow">
-  <section class="flex row justify-between items-baseline px-2 py-1">
-    <div class="flex row items-baseline">
-      <h1 class="h-5 text-xl font-bold text-gray-850">Ativos</h1>
-      <h3 class="h-3 text-sm font-medium text-gray-550">
-        &nbsp;&nbsp;/&nbsp;{{ nameCompany }} Unit
-      </h3>
-    </div>
-    <div class="flex row items-baseline">
-      <app-custom-button
-        text="Sensor de Energia"
-        class="mr-2"
-        [class.active]="filterEnergySensorActive()"
-        [styles]="filterEnergySensorActive() ? activeStyle : ''"
-        customIcon="assets/volt.svg"
-        (onClick)="
-          filterEnergySensorActive.set(!filterEnergySensorActive())
-        "></app-custom-button>
-
-      <app-custom-button
-        text="Crítico"
-        [styles]="filterCriticalSensorActive() ? activeStyle : ''"
-        [class.active]="filterCriticalSensorActive()"
-        customIcon="assets/point.svg"
-        (onClick)="
-          filterCriticalSensorActive.set(!filterCriticalSensorActive())
-        "></app-custom-button>
-    </div>
+  class="min-h-full max-w-screen max-h-screen p-6 bg-gray-50 border border-gray-350 mx-2 my-2 rounded-lg shadow">
+  <app-header [title]="company()?.name"> </app-header>
+  <section
+    class="flex row justify-between items-stretch px-2 py-1 smx:mx-auto smx:mt-4 smx:max-w-full smx:w-full smx:flex-col">
+    <app-form
+      class="lg:w-4/12 md:w-6/12 bg-white border border-gray-200 rounded-sm mt-3 smx:w-full md:mr-2">
+    </app-form>
+    <app-details
+      class="container__height lg:w-8/12 md:w-6/12 bg-white border border-gray-200 rounded-sm mt-3 smx:w-full"></app-details>
   </section>
 </div>
+
 @if (isLoading$ | async) {
-<div>Loading...</div>
 <!-- } @else { @for (company of companies$ | async; track company;) { -->
 <!-- <div
   id="accordion-color"
