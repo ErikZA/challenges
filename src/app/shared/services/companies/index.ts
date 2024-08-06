@@ -11,12 +11,7 @@ import {
 } from '@app/shared/interfaces/companies';
 import { environment } from '@env/environment';
 
-import {
-  delay,
-  distinctUntilChanged,
-  ReplaySubject,
-  firstValueFrom,
-} from 'rxjs';
+import { delay, ReplaySubject, firstValueFrom } from 'rxjs';
 
 import { motorOne, motorThree, motorTwo } from './mock';
 
@@ -114,6 +109,8 @@ export class CompaniesService {
     this.getAssetsByCompanyId(key)
       .subscribe(assets => {
         this.listCompanies$.subscribe(companies => {
+          console.time('start');
+
           const {
             sensorWithoutLocation,
             assetsWithLocation,
@@ -134,6 +131,7 @@ export class CompaniesService {
           this.populateSensors(sensorWithLocation, companies, key);
 
           this.listOfAssets$.next(companies);
+          console.timeEnd('start');
         });
       })
       .add(() => this.isLoading$.next(false));

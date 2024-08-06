@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
+import { VirtualListComponent } from '@app/components/list/virtual-list/virtual-list.component';
 import { NodeAsset } from '@app/shared/interfaces/companies';
 import { CompaniesService } from '@app/shared/services/companies';
 
@@ -13,7 +14,13 @@ import { HeaderComponent } from './components/header/header.component';
 @Component({
   selector: 'app-companies',
   standalone: true,
-  imports: [CommonModule, HeaderComponent, FormComponent, DetailsComponent],
+  imports: [
+    CommonModule,
+    HeaderComponent,
+    FormComponent,
+    DetailsComponent,
+    VirtualListComponent,
+  ],
   templateUrl: './companies.component.html',
   styleUrl: './companies.component.scss',
 })
