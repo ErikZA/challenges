@@ -5,6 +5,7 @@ import {
   Component,
   ElementRef,
   Input,
+  TemplateRef,
   ViewChild,
 } from '@angular/core';
 import { NodeAsset } from '@app/shared/interfaces/companies';
@@ -17,6 +18,8 @@ import { NodeAsset } from '@app/shared/interfaces/companies';
   styleUrl: './virtual-list.component.scss',
 })
 export class VirtualListComponent implements AfterViewInit {
+  @ViewChild('templateHtml')
+  public templateHtml!: TemplateRef<HTMLLIElement>;
   @ViewChild('virtual_list') private virtualList!: ElementRef<HTMLUListElement>;
   // @Input() public data: NodeAsset[] = [];
   qtdItems = 17_900_000;
@@ -58,7 +61,7 @@ export class VirtualListComponent implements AfterViewInit {
   }
 
   private createEndSpacer(endSpacerHeight: number) {
-    const endSpacer = document.createElement('li');
+    const endSpacer = document.createElement('templateHtml');
 
     endSpacer.style.height = endSpacerHeight + 'px';
     this.virtualList.nativeElement.append(endSpacer);
@@ -68,7 +71,7 @@ export class VirtualListComponent implements AfterViewInit {
     const items = this.data.slice(startItemIndex, endItemIndex);
 
     items.forEach(item => {
-      const listItem = document.createElement('li');
+      const listItem = document.createElement('templateHtml');
 
       listItem.innerHTML = `${item}`;
       listItem.style.height = this.lineHeight + 'px';
@@ -78,7 +81,7 @@ export class VirtualListComponent implements AfterViewInit {
   }
 
   private createStartSpacer(startSpacerHeight: number) {
-    const startSpacer = document.createElement('li');
+    const startSpacer = document.createElement('templateHtml');
 
     startSpacer.style.height = `${startSpacerHeight}px`;
     this.virtualList.nativeElement.append(startSpacer);
