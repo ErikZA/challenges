@@ -1,9 +1,12 @@
-<ul class="list__view" #virtual_list></ul>
+<ul class="list__view" #virtual_list>
+  <ng-container #vcr></ng-container>
+</ul>
 
-<ng-template #templateHtml>
-  <li class="list__item" [style.height.px]="36">
-    <div class=""></div>
+<ng-template #templateHtml let-item>
+  <li class="list__item" [class.item__active]="!!item">
+    <app-item-drop class="w-full" *ngIf="item" [item]="item"></app-item-drop>
+
+    <!-- <ng-container
+      *ngTemplateOutlet="templateHtmlItem; context: { item }"></ng-container> -->
   </li>
 </ng-template>
-
-<ng-container #placeholder></ng-container>

@@ -351,4 +351,10 @@ export class CompaniesService {
       sensorWithLocation,
     };
   }
+
+  public async getChieldsOfCompany(id: string) {
+    const companies = await firstValueFrom(this.listCompanies$);
+
+    return companies[id].children;
+  }
 }

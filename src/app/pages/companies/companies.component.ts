@@ -2,10 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { VirtualListComponent } from '@app/components/list/virtual-list/virtual-list.component';
-import { NodeAsset } from '@app/shared/interfaces/companies';
+import { NodeAsset, TreeOfAssets } from '@app/shared/interfaces/companies';
 import { CompaniesService } from '@app/shared/services/companies';
 
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable, of } from 'rxjs';
 
 import { DetailsComponent } from './components/details/details.component';
 import { FormComponent } from './components/form/form.component';
@@ -27,6 +27,7 @@ import { HeaderComponent } from './components/header/header.component';
 export class CompaniesComponent implements OnInit {
   private companiesService = inject(CompaniesService);
   public selectedCompany = signal<string | null>(null);
+  public selectedChields = signal<TreeOfAssets | null>(null);
 
   public company = signal<NodeAsset | null>(null);
 
@@ -44,6 +45,25 @@ export class CompaniesComponent implements OnInit {
     return this.companiesService.listOfAssets$;
   }
 
+  public loadCurrentCompanyChildren() {
+    this.companiesService.listOfAssets$.subscribe(async () => {
+      if (!this.company()?.id) return;
+      console.log(
+        'loadCurrentCompanyChildren',
+        this.selectedChields.set(
+          await this.companiesService.getChieldsOfCompany(
+            this.company()?.id || ''
+          )
+        )
+      );
+      this.selectedChields.set(
+        await this.companiesService.getChieldsOfCompany(
+          this.company()?.id || ''
+        )
+      );
+    });
+  }
+
   private get companies() {
     return firstValueFrom(this.companiesService.listCompanies$);
   }
@@ -57,6 +77,7 @@ export class CompaniesComponent implements OnInit {
 
       this.company.set(current);
       this.companiesService.onLoadAssets(current.id);
+      this.loadCurrentCompanyChildren();
     });
   }
 

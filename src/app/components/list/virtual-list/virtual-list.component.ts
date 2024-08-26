@@ -1,35 +1,70 @@
 import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
-  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
+  EmbeddedViewRef,
+  inject,
   Input,
+  OnDestroy,
   TemplateRef,
   ViewChild,
+  ViewContainerRef,
 } from '@angular/core';
-import { NodeAsset } from '@app/shared/interfaces/companies';
+import { ItemDropComponent } from '@app/components/list/item-drop/item-drop.component';
+import { NodeAsset, TreeOfAssets } from '@app/shared/interfaces/companies';
+
+interface Context {
+  $implicit: NodeAsset | null;
+}
 
 @Component({
   selector: 'app-virtual-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ItemDropComponent],
   templateUrl: './virtual-list.component.html',
   styleUrl: './virtual-list.component.scss',
 })
-export class VirtualListComponent implements AfterViewInit {
-  @ViewChild('templateHtml')
-  public templateHtml!: TemplateRef<HTMLLIElement>;
+export class VirtualListComponent implements AfterViewInit, OnDestroy {
+  @ViewChild('templateHtml', { static: true, read: TemplateRef })
+  public templateHtml!: TemplateRef<Context>;
   @ViewChild('virtual_list') private virtualList!: ElementRef<HTMLUListElement>;
-  // @Input() public data: NodeAsset[] = [];
-  qtdItems = 17_900_000;
-  data = Array.from({ length: this.qtdItems }, (_, i) => i + 1);
 
+  @ViewChild('vcr', { static: true, read: ViewContainerRef })
+  public vcr!: ViewContainerRef;
+
+  @Input({ required: true }) public set items(nodes: TreeOfAssets | null) {
+    console.log('nodes', Object.values(nodes || {}));
+    this.formatItems = nodes ? Object.values(nodes) : [];
+    this.qtdItems = this.formatItems.length;
+    // this.dataLength = Array.from({ length: this.qtdItems }, (_, i) => i + 1);
+    this.render();
+  }
+
+  @Input() public templateHtmlItem: TemplateRef<{ item: TreeOfAssets }> | null =
+    null;
+
+  public formatItems: NodeAsset[] = [];
+
+  public qtdItems = 0;
+  // public dataLength = Array.from({ length: this.qtdItems }, (_, i) => i + 1);
+
+  private embeddedViewRefs: EmbeddedViewRef<Context>[] = [];
+  private cdr = inject(ChangeDetectorRef);
   private lineHeight = 36;
   private limit = 15;
   private visibleHeight = this.limit * this.lineHeight;
 
   private scrollTop = 0;
+
+  public ngOnDestroy() {
+    for (const viewRef of this.embeddedViewRefs) {
+      if (viewRef) {
+        viewRef.destroy();
+      }
+    }
+  }
 
   public ngAfterViewInit(): void {
     if (this.virtualList?.nativeElement) {
@@ -49,46 +84,44 @@ export class VirtualListComponent implements AfterViewInit {
 
     this.resetList();
 
-    this.createStartSpacer(startSpacerHeight);
+    this.createSpace(startSpacerHeight);
 
     this.populateList(startItemIndex, endItemIndex);
 
-    this.createEndSpacer(endSpacerHeight);
+    this.createSpace(endSpacerHeight);
+
+    this.cdr.detectChanges();
   }
 
   private resetList() {
-    this.virtualList.nativeElement.innerHTML = '';
+    this.vcr.clear();
   }
 
-  private createEndSpacer(endSpacerHeight: number) {
-    const endSpacer = document.createElement('templateHtml');
+  private createSpace(spacerHeight: number) {
+    const spacer = this.vcr.createEmbeddedView(this.templateHtml, {
+      $implicit: null,
+    });
 
-    endSpacer.style.height = endSpacerHeight + 'px';
-    this.virtualList.nativeElement.append(endSpacer);
+    spacer.rootNodes[0].style.height = spacerHeight + 'px';
+    this.embeddedViewRefs.push(spacer);
   }
 
   private populateList(startItemIndex: number, endItemIndex: number) {
-    const items = this.data.slice(startItemIndex, endItemIndex);
+    const items = this.formatItems?.slice(startItemIndex, endItemIndex) || [];
 
     items.forEach(item => {
-      const listItem = document.createElement('templateHtml');
+      const listItem = this.vcr.createEmbeddedView(this.templateHtml, {
+        $implicit: item,
+      });
 
-      listItem.innerHTML = `${item}`;
-      listItem.style.height = this.lineHeight + 'px';
-      listItem.classList.add('list__item');
-      this.virtualList.nativeElement.append(listItem);
+      listItem.rootNodes[0].style.height = this.lineHeight + 'px';
+      listItem.rootNodes[0].classList.add('list__item');
+      this.embeddedViewRefs.push(listItem);
     });
   }
 
-  private createStartSpacer(startSpacerHeight: number) {
-    const startSpacer = document.createElement('templateHtml');
-
-    startSpacer.style.height = `${startSpacerHeight}px`;
-    this.virtualList.nativeElement.append(startSpacer);
-  }
-
   private calculateVisibleItems() {
-    const fullListHeight = this.data.length * this.lineHeight;
+    const fullListHeight = this.qtdItems * this.lineHeight;
     const startItemIndex = Math.ceil(this.scrollTop / this.lineHeight);
     const endItemIndex = startItemIndex + this.limit;
     const startSpacerHeight = this.scrollTop;

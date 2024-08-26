@@ -9,11 +9,14 @@
   }
 
   .list__item {
-    background-color: #000;
     padding-inline: 8px;
-    color: #fff;
     border-bottom: 2px solid #fff;
     display: flex;
     align-items: center;
+  }
+
+  .item__active {
+    // height: 36px;
+    // max-height: 36px;
   }
 }
