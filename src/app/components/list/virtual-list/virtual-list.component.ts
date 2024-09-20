@@ -1,133 +1,122 @@
 import { CommonModule } from '@angular/common';
-import {
-  AfterViewInit,
-  ChangeDetectorRef,
-  Component,
-  ElementRef,
-  EmbeddedViewRef,
-  inject,
-  Input,
-  OnDestroy,
-  TemplateRef,
-  ViewChild,
-  ViewContainerRef,
-} from '@angular/core';
+import { Component } from '@angular/core';
+import { AbstractListComponent } from '@app/components/list/abstract-list';
 import { ItemDropComponent } from '@app/components/list/item-drop/item-drop.component';
 import { NodeAsset, TreeOfAssets } from '@app/shared/interfaces/companies';
 
-interface Context {
-  $implicit: NodeAsset | null;
-}
+import { SvgIconComponent } from 'angular-svg-icon';
 
 @Component({
   selector: 'app-virtual-list',
   standalone: true,
-  imports: [CommonModule, ItemDropComponent],
+  imports: [CommonModule, ItemDropComponent, SvgIconComponent],
   templateUrl: './virtual-list.component.html',
   styleUrl: './virtual-list.component.scss',
 })
-export class VirtualListComponent implements AfterViewInit, OnDestroy {
-  @ViewChild('templateHtml', { static: true, read: TemplateRef })
-  public templateHtml!: TemplateRef<Context>;
-  @ViewChild('virtual_list') private virtualList!: ElementRef<HTMLUListElement>;
+export class VirtualListComponent extends AbstractListComponent {
+  private selectedIds = new Set<string>();
 
-  @ViewChild('vcr', { static: true, read: ViewContainerRef })
-  public vcr!: ViewContainerRef;
+  constructor() {
+    super();
+  }
 
-  @Input({ required: true }) public set items(nodes: TreeOfAssets | null) {
-    console.log('nodes', Object.values(nodes || {}));
-    this.formatItems = nodes ? Object.values(nodes) : [];
+  public subNodes(node: NodeAsset | null) {
+    return Object.values(node?.children || {}) as unknown as TreeOfAssets[];
+  }
+
+  public allSubNodes(node: NodeAsset | TreeOfAssets | null) {
+    const subNodes = this.subNodes(node as NodeAsset);
+
+    return subNodes.reduce<any>((acc, subNode) => {
+      const subSubNodes = this.allSubNodes(subNode);
+
+      return [...acc, subNode, ...subSubNodes];
+    }, [] as NodeAsset[]) as NodeAsset[];
+  }
+
+  public icon(node: NodeAsset | null) {
+    switch (node?.type) {
+      case 'COMPANY':
+        return 'assets/GoLocation.svg';
+      case 'LOCATION':
+        return 'assets/GoLocation.svg';
+      case 'SUB-LOCATION':
+        return 'assets/GoLocation.svg';
+      case 'ASSET':
+        return 'assets/IoCubeOutline.svg';
+      case 'SENSOR':
+        return 'assets/small-box.svg';
+      default:
+        return '';
+    }
+  }
+
+  public isSensor(node: NodeAsset | null) {
+    return node?.type === 'SENSOR' && !node?.locationId && !node?.parentId;
+  }
+
+  public showArrow(node: NodeAsset | null) {
+    const hasChildren = Object.values(node?.children || {}).length > 0;
+
+    return hasChildren;
+  }
+
+  public toggleActiveItem(item: NodeAsset | null, index: number) {
+    console.log('item', item, index);
+    console.time('start-end-1');
+
+    const subNodes = this.subNodes(item).map(s => {
+      return {
+        ...s,
+        space: (item?.space || 0) + 1,
+      } as NodeAsset;
+    });
+
+    if (item && item.id && !this.selectedIds.has(item.id) && subNodes.length) {
+      this.selectedIds.add(item.id);
+
+      this.insertSubNodesAfterIndexWithoutDelete(subNodes, index);
+    } else if (item && item.id && this.selectedIds.has(item.id)) {
+      this.selectedIds.delete(item.id);
+
+      this.removeSubNodes(item);
+    }
+    console.timeEnd('start-end-1');
+  }
+
+  public removeSubNodes(item: NodeAsset | null) {
+    const subNodes = this.allSubNodes(item);
+
+    this.formatItems = this.formatItems.filter(node => {
+      const isNode = !subNodes.some(subNode => subNode.id === node.id);
+
+      if (!isNode && node.id) {
+        this.selectedIds.delete(node.id);
+      }
+
+      return isNode;
+    });
+
     this.qtdItems = this.formatItems.length;
-    // this.dataLength = Array.from({ length: this.qtdItems }, (_, i) => i + 1);
+
     this.render();
   }
 
-  @Input() public templateHtmlItem: TemplateRef<{ item: TreeOfAssets }> | null =
-    null;
+  public insertSubNodesAfterIndexWithoutDelete(
+    subNodes: TreeOfAssets[] | NodeAsset[],
+    index: number
+  ) {
+    const prevItens = this.formatItems.slice(0, index + 1);
+    const nextItens = this.formatItems.slice(index + 1);
 
-  public formatItems: NodeAsset[] = [];
+    this.formatItems = [
+      ...prevItens,
+      ...(subNodes as NodeAsset[]),
+      ...nextItens,
+    ];
 
-  public qtdItems = 0;
-  // public dataLength = Array.from({ length: this.qtdItems }, (_, i) => i + 1);
+    this.qtdItems = this.formatItems.length;
 
-  private embeddedViewRefs: EmbeddedViewRef<Context>[] = [];
-  private cdr = inject(ChangeDetectorRef);
-  private lineHeight = 36;
-  private limit = 15;
-  private visibleHeight = this.limit * this.lineHeight;
-
-  private scrollTop = 0;
-
-  public ngOnDestroy() {
-    for (const viewRef of this.embeddedViewRefs) {
-      if (viewRef) {
-        viewRef.destroy();
-      }
-    }
-  }
-
-  public ngAfterViewInit(): void {
-    if (this.virtualList?.nativeElement) {
-      this.virtualList.nativeElement.style.height =
-        this.lineHeight * this.limit + 'px';
-      this.virtualList.nativeElement.addEventListener('scroll', e => {
-        this.scrollTop = (e!.currentTarget as any).scrollTop;
-        this.render();
-      });
-      this.render();
-    }
-  }
-
-  private render() {
-    const { startSpacerHeight, startItemIndex, endItemIndex, endSpacerHeight } =
-      this.calculateVisibleItems();
-
-    this.resetList();
-
-    this.createSpace(startSpacerHeight);
-
-    this.populateList(startItemIndex, endItemIndex);
-
-    this.createSpace(endSpacerHeight);
-
-    this.cdr.detectChanges();
-  }
-
-  private resetList() {
-    this.vcr.clear();
-  }
-
-  private createSpace(spacerHeight: number) {
-    const spacer = this.vcr.createEmbeddedView(this.templateHtml, {
-      $implicit: null,
-    });
-
-    spacer.rootNodes[0].style.height = spacerHeight + 'px';
-    this.embeddedViewRefs.push(spacer);
-  }
-
-  private populateList(startItemIndex: number, endItemIndex: number) {
-    const items = this.formatItems?.slice(startItemIndex, endItemIndex) || [];
-
-    items.forEach(item => {
-      const listItem = this.vcr.createEmbeddedView(this.templateHtml, {
-        $implicit: item,
-      });
-
-      listItem.rootNodes[0].style.height = this.lineHeight + 'px';
-      listItem.rootNodes[0].classList.add('list__item');
-      this.embeddedViewRefs.push(listItem);
-    });
-  }
-
-  private calculateVisibleItems() {
-    const fullListHeight = this.qtdItems * this.lineHeight;
-    const startItemIndex = Math.ceil(this.scrollTop / this.lineHeight);
-    const endItemIndex = startItemIndex + this.limit;
-    const startSpacerHeight = this.scrollTop;
-    const endSpacerHeight =
-      fullListHeight - startSpacerHeight - this.visibleHeight;
-
-    return { startSpacerHeight, startItemIndex, endItemIndex, endSpacerHeight };
+    this.render();
   }
 }

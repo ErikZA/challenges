@@ -7,6 +7,7 @@ export interface Asset {
   status: string;
   gatewayId: string;
   locationId: string | null;
+  space?: number;
 }
 
 export type Companies = Array<Pick<Asset, 'id' | 'name'>>;

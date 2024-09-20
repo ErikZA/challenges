@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, TemplateRef } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { AbstractListComponent } from '@app/components/list/abstract-list';
 import { VirtualListComponent } from '@app/components/list/virtual-list/virtual-list.component';
 import { NodeAsset, TreeOfAssets } from '@app/shared/interfaces/companies';
 
@@ -17,8 +18,6 @@ export class ItemDropComponent {
     this._subNodes = Object.values(data?.children || {});
     this._item = data;
   }
-  @Input() public templateHtml: TemplateRef<{ item: TreeOfAssets }> | null =
-    null;
 
   private _subNodes: NodeAsset[] = [];
   private _item: NodeAsset | null = null;

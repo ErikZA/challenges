@@ -109,7 +109,7 @@ export class CompaniesService {
     this.getAssetsByCompanyId(key)
       .subscribe(assets => {
         this.listCompanies$.subscribe(companies => {
-          console.time('start');
+          console.time('start-end');
 
           const {
             sensorWithoutLocation,
@@ -131,7 +131,7 @@ export class CompaniesService {
           this.populateSensors(sensorWithLocation, companies, key);
 
           this.listOfAssets$.next(companies);
-          console.timeEnd('start');
+          console.timeEnd('start-end');
         });
       })
       .add(() => this.isLoading$.next(false));

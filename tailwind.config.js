@@ -4,7 +4,6 @@ const defaultTheme = require('tailwindcss/defaultTheme');
 module.exports = {
   content: ['./src/**/*.{html,ts}'],
   theme: {
-    extend: {},
     screens: {
       smx: { max: '767px' },
       ...defaultTheme.screens,
@@ -43,6 +42,17 @@ module.exports = {
     fontFamily: {
       inter: ['Inter', 'sans-serif'],
       roboto: ['Roboto', 'sans-serif'],
+    },
+    extend: {
+      keyframes: {
+        sideways: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-60%)' },
+        },
+      },
+      animation: {
+        sideways: 'sideways 8s linear infinite',
+      },
     },
   },
   plugins: [],

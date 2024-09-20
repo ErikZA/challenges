@@ -1,4 +1,4 @@
-<div
+<!-- <div
   id="accordion-nested-parent"
   class="w-full min-h-full hover:bg-gray-100 hover:border hover:border-gray-200"
   data-accordion="collapse">
@@ -19,13 +19,28 @@
       <span>{{ currentItem?.name }}</span>
     </button>
     @for (item of subNodes(currentItem); track $index) {
-    <!-- <ng-container
-      *ngTemplateOutlet="templateHtml; context: { item }"></ng-container> -->
-
-    <app-virtual-list [items]="item"></app-virtual-list>
     }
   </h2>
-</div>
+</div> -->
+<!-- <ng-container
+*ngTemplateOutlet="templateHtml; context: { item }"></ng-container> -->
+
+<ul class="list__view" #virtual_list>
+  <ng-container #vcr></ng-container>
+</ul>
+
+<ng-template #templateHtml let-item>
+  <li class="list__item" [class.item__active]="!!item">
+    <!-- <app-item-drop
+      class="w-full"
+      *ngIf="item"
+      [item]="item"
+      [items]="{}"></app-item-drop> -->
+
+    <!-- <ng-container
+      *ngTemplateOutlet="templateHtmlItem; context: { item }"></ng-container> -->
+  </li>
+</ng-template>
 <!--
 <ng-template #templateHtml let-nodeItem="item" #templateRef>
   <div

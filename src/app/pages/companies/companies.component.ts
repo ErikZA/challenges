@@ -5,7 +5,7 @@ import { VirtualListComponent } from '@app/components/list/virtual-list/virtual-
 import { NodeAsset, TreeOfAssets } from '@app/shared/interfaces/companies';
 import { CompaniesService } from '@app/shared/services/companies';
 
-import { firstValueFrom, Observable, of } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 
 import { DetailsComponent } from './components/details/details.component';
 import { FormComponent } from './components/form/form.component';
@@ -47,15 +47,8 @@ export class CompaniesComponent implements OnInit {
 
   public loadCurrentCompanyChildren() {
     this.companiesService.listOfAssets$.subscribe(async () => {
+      console.log('loadCurrentCompanyChildren');
       if (!this.company()?.id) return;
-      console.log(
-        'loadCurrentCompanyChildren',
-        this.selectedChields.set(
-          await this.companiesService.getChieldsOfCompany(
-            this.company()?.id || ''
-          )
-        )
-      );
       this.selectedChields.set(
         await this.companiesService.getChieldsOfCompany(
           this.company()?.id || ''
