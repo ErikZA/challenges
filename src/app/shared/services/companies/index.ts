@@ -20,6 +20,7 @@ import { motorOne, motorThree, motorTwo } from './mock';
 })
 export class CompaniesService {
   private baseUrl = environment.api;
+  private _currentCompany_id: string | null = null;
 
   public listCompanies$: ReplaySubject<TreeOfAssets> =
     new ReplaySubject<TreeOfAssets>(1);
@@ -66,7 +67,7 @@ export class CompaniesService {
     }
     this.isLoading$.next(true);
     this.onLoadLocationsByCompanyId(key);
-    this.onLoadAssetsByCompanyId(key);
+    this.listOfLocations$.subscribe(() => this.onLoadAssetsByCompanyId(key));
   }
 
   private onLoadLocationsByCompanyId(key: string) {
@@ -130,8 +131,8 @@ export class CompaniesService {
 
           this.populateSensors(sensorWithLocation, companies, key);
 
-          this.listOfAssets$.next(companies);
           console.timeEnd('start-end');
+          this.listOfAssets$.next(companies);
         });
       })
       .add(() => this.isLoading$.next(false));
@@ -176,8 +177,8 @@ export class CompaniesService {
   }
 
   private initLists(size: number) {
-    this.listOfLocations$ = new ReplaySubject<TreeOfAssets>(size);
-    this.listOfAssets$ = new ReplaySubject<TreeOfAssets>(size);
+    // this.listOfLocations$ = new ReplaySubject<TreeOfAssets>(size);
+    // this.listOfAssets$ = new ReplaySubject<TreeOfAssets>(size);
   }
 
   private populateLocationAssets(

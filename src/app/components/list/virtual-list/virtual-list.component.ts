@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { AbstractListComponent } from '@app/components/list/abstract-list';
-import { ItemDropComponent } from '@app/components/list/item-drop/item-drop.component';
 import { NodeAsset, TreeOfAssets } from '@app/shared/interfaces/companies';
 
 import { SvgIconComponent } from 'angular-svg-icon';
@@ -9,7 +8,7 @@ import { SvgIconComponent } from 'angular-svg-icon';
 @Component({
   selector: 'app-virtual-list',
   standalone: true,
-  imports: [CommonModule, ItemDropComponent, SvgIconComponent],
+  imports: [CommonModule, SvgIconComponent],
   templateUrl: './virtual-list.component.html',
   styleUrl: './virtual-list.component.scss',
 })

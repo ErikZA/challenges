@@ -7,6 +7,7 @@
     class="list__item"
     [ngStyle]="{
       'padding-left': !!item.node?.space ? (item.node.space * 16) + 'px' : '0px',
+      'visibility': item.node === null ? 'hidden' : 'visible',
     }">
     <div
       class="w-full min-h-full bg-gray-50 hover:bg-gray-100 hover:border hover:border-gray-200"
@@ -16,7 +17,7 @@
           #btnP
           (click)="toggleActiveItem(item.node, item.index)"
           type="button"
-          class="flex items-center justify-start w-full p-x-1 rtl:text-right text-gray-900 font-normal focus:ring-4 focus:ring-gray-200 gap-3">
+          class="flex items-center justify-start w-full p-x-1 rtl:text-right text-gray-900 font-normal gap-3">
           <div
             #boxC
             class="flex row justify-start items-center z-10 bg-gray-100">

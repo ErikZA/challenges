@@ -6,7 +6,9 @@
     <div
       class="lg:w-4/12 md:w-6/12 bg-white border border-gray-200 rounded-sm mt-3 smx:w-full md:mr-2">
       <app-form></app-form>
+      @if (showList) {
       <app-virtual-list [items]="selectedChields()"></app-virtual-list>
+      }
     </div>
     <app-details
       class="container__height lg:w-8/12 md:w-6/12 bg-white border border-gray-200 rounded-sm mt-3 smx:w-full"></app-details>

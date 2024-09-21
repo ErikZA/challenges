@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { VirtualListComponent } from '@app/components/list/virtual-list/virtual-list.component';
 import { NodeAsset, TreeOfAssets } from '@app/shared/interfaces/companies';
@@ -35,6 +41,7 @@ export class CompaniesComponent implements OnInit {
 
   public async ngOnInit() {
     this.onCurrentCompany();
+    this.loadCurrentCompanyChildren();
   }
 
   public get isLoading$() {
@@ -47,14 +54,20 @@ export class CompaniesComponent implements OnInit {
 
   public loadCurrentCompanyChildren() {
     this.companiesService.listOfAssets$.subscribe(async () => {
-      console.log('loadCurrentCompanyChildren');
+      console.log('loadCurrentCompanyChildren', this.company()?.id);
+      this.selectedChields.set(null);
       if (!this.company()?.id) return;
+
       this.selectedChields.set(
         await this.companiesService.getChieldsOfCompany(
           this.company()?.id || ''
         )
       );
     });
+  }
+
+  public get showList() {
+    return !!this.selectedChields();
   }
 
   private get companies() {
@@ -70,7 +83,6 @@ export class CompaniesComponent implements OnInit {
 
       this.company.set(current);
       this.companiesService.onLoadAssets(current.id);
-      this.loadCurrentCompanyChildren();
     });
   }
 

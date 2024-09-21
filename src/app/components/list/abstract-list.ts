@@ -7,12 +7,13 @@ import {
   EmbeddedViewRef,
   inject,
   Input,
+  OnChanges,
   OnDestroy,
+  SimpleChanges,
   TemplateRef,
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
-import { ItemDropComponent } from '@app/components/list/item-drop/item-drop.component';
 import { NodeAsset, TreeOfAssets } from '@app/shared/interfaces/companies';
 
 export interface Context {
@@ -21,10 +22,12 @@ export interface Context {
 
 @Component({
   standalone: true,
-  imports: [CommonModule, ItemDropComponent],
+  imports: [CommonModule],
   template: ``,
 })
-export class AbstractListComponent implements AfterViewInit, OnDestroy {
+export class AbstractListComponent
+  implements AfterViewInit, OnDestroy, OnChanges
+{
   @ViewChild('templateHtml', { static: true, read: TemplateRef })
   public templateHtml!: TemplateRef<Context>;
   @ViewChild('virtual_list')
@@ -33,23 +36,38 @@ export class AbstractListComponent implements AfterViewInit, OnDestroy {
   @ViewChild('vcr', { static: true, read: ViewContainerRef })
   public vcr!: ViewContainerRef;
 
-  @Input({ required: true }) public set items(
-    nodes: TreeOfAssets | NodeAsset | null
-  ) {
-    console.log('nodes', nodes, this.itemsAsNodeAsset(nodes));
-    this.formatItems = this.itemsAsNodeAsset(nodes);
-    this.qtdItems = this.formatItems.length;
-    this.render();
+  @Input({ required: true }) public items: TreeOfAssets | NodeAsset | null =
+    null;
+
+  public async ngOnChanges(changes: SimpleChanges) {
+    console.log('ngOnChanges', changes);
+
+    const nodes = changes['items'].currentValue as
+      | TreeOfAssets
+      | NodeAsset
+      | null;
+
+    console.log('nodes', nodes);
+    this.itemsAsNodeAsset(nodes).then(items => {
+      this.formatItems = items;
+      this.qtdItems = this.formatItems.length;
+      console.log('formatItems', this.formatItems);
+      this.render();
+    });
   }
 
-  protected itemsAsNodeAsset(nodes: TreeOfAssets | NodeAsset | null) {
-    if (nodes && nodes.id) {
-      return [nodes] as NodeAsset[];
-    } else if (nodes) {
-      return Object.values(nodes) as NodeAsset[];
-    }
-
-    return [] as NodeAsset[];
+  protected itemsAsNodeAsset(
+    nodes: TreeOfAssets | NodeAsset | null
+  ): Promise<NodeAsset[]> {
+    return new Promise(resolve => {
+      if (nodes && nodes.id) {
+        resolve([nodes] as NodeAsset[]);
+      } else if (nodes) {
+        resolve(Object.values(nodes) as NodeAsset[]);
+      } else {
+        resolve([] as NodeAsset[]);
+      }
+    });
   }
 
   public formatItems: NodeAsset[] = [];
@@ -85,6 +103,8 @@ export class AbstractListComponent implements AfterViewInit, OnDestroy {
   }
 
   protected render() {
+    console.log('render', this.formatItems, this.qtdItems);
+
     const { startSpacerHeight, startItemIndex, endItemIndex, endSpacerHeight } =
       this.calculateVisibleItems();
 
