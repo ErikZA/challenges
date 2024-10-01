@@ -9,6 +9,7 @@ import {
 import { ActivatedRoute, Params } from '@angular/router';
 import { VirtualListComponent } from '@app/components/list/virtual-list/virtual-list.component';
 import { NodeAsset, TreeOfAssets } from '@app/shared/interfaces/companies';
+import { ActiveFilter } from '@app/shared/interfaces/core/menu.interface';
 import { CompaniesService } from '@app/shared/services/companies';
 
 import { firstValueFrom } from 'rxjs';
@@ -36,6 +37,7 @@ export class CompaniesComponent implements OnInit {
   public selectedChields = signal<TreeOfAssets | null>(null);
 
   public company = signal<NodeAsset | null>(null);
+  private activeFilter = signal<ActiveFilter | null>(null);
 
   private router = inject(ActivatedRoute);
 
@@ -52,17 +54,29 @@ export class CompaniesComponent implements OnInit {
     return this.companiesService.listOfAssets$;
   }
 
+  public get filteredAssetsCritical() {
+    return this.companiesService.criticalAssets;
+  }
+
+  public get filteredAssetsEnergy() {
+    return this.companiesService.energyAssets;
+  }
+
+  public get filteredAssetsEnergyCritical() {
+    return this.companiesService.criticalAndEnergyAssets;
+  }
+
+  private get chieldsOfCompany() {
+    return this.companiesService.getChieldsOfCompany(this.company()?.id || '');
+  }
+
   public loadCurrentCompanyChildren() {
     this.companiesService.listOfAssets$.subscribe(async () => {
-      console.log('loadCurrentCompanyChildren', this.company()?.id);
       this.selectedChields.set(null);
       if (!this.company()?.id) return;
 
-      this.selectedChields.set(
-        await this.companiesService.getChieldsOfCompany(
-          this.company()?.id || ''
-        )
-      );
+      // this.selectedChields.set(await this.chieldsOfCompany);
+      await this.changeFilter(this.activeFilter());
     });
   }
 
@@ -92,6 +106,19 @@ export class CompaniesComponent implements OnInit {
 
   public get showAccordion() {
     return this.selectedCompany();
+  }
+
+  public async changeFilter(props: ActiveFilter | null) {
+    this.activeFilter.set(props);
+    if (props?.energy && props?.critical) {
+      this.selectedChields.set(this.filteredAssetsEnergyCritical);
+    } else if (props?.energy) {
+      this.selectedChields.set(this.filteredAssetsEnergy);
+    } else if (props?.critical) {
+      this.selectedChields.set(this.filteredAssetsCritical);
+    } else {
+      this.selectedChields.set(await this.chieldsOfCompany);
+    }
   }
 
   public onSubmit() {

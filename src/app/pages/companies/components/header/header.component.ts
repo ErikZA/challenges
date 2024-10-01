@@ -8,6 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { CustomButtonComponent } from '@app/components/button/custom-button/custom-button/custom-button.component';
+import { ActiveFilter } from '@app/shared/interfaces/core/menu.interface';
 
 @Component({
   selector: 'app-header',
@@ -20,8 +21,7 @@ import { CustomButtonComponent } from '@app/components/button/custom-button/cust
 export class HeaderComponent {
   @Input() public title? = '';
 
-  @Output() public filterCriticaEvent = new EventEmitter<void>();
-  @Output() public filterEnergyEvent = new EventEmitter<void>();
+  @Output() public filterEvent = new EventEmitter<ActiveFilter>();
 
   public filterEnergySensorActive = signal<boolean>(false);
   public filterCriticalSensorActive = signal<boolean>(false);
@@ -32,11 +32,18 @@ export class HeaderComponent {
 
   public onClickFilterCriticalSensor() {
     this.filterCriticalSensorActive.set(!this.filterCriticalSensorActive());
-    this.filterCriticaEvent.emit();
+    this.emitEventProps();
   }
 
   public onClickFilterEnergySensor() {
     this.filterEnergySensorActive.set(!this.filterEnergySensorActive());
-    this.filterEnergyEvent.emit();
+    this.emitEventProps();
+  }
+
+  private emitEventProps() {
+    this.filterEvent.emit({
+      energy: this.filterEnergySensorActive(),
+      critical: this.filterCriticalSensorActive(),
+    });
   }
 }

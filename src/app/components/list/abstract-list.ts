@@ -40,18 +40,14 @@ export class AbstractListComponent
     null;
 
   public async ngOnChanges(changes: SimpleChanges) {
-    console.log('ngOnChanges', changes);
-
     const nodes = changes['items'].currentValue as
       | TreeOfAssets
       | NodeAsset
       | null;
 
-    console.log('nodes', nodes);
     this.itemsAsNodeAsset(nodes).then(items => {
       this.formatItems = items;
       this.qtdItems = this.formatItems.length;
-      console.log('formatItems', this.formatItems);
       this.render();
     });
   }
@@ -103,8 +99,6 @@ export class AbstractListComponent
   }
 
   protected render() {
-    console.log('render', this.formatItems, this.qtdItems);
-
     const { startSpacerHeight, startItemIndex, endItemIndex, endSpacerHeight } =
       this.calculateVisibleItems();
 
@@ -135,9 +129,12 @@ export class AbstractListComponent
   private populateList(startItemIndex: number, endItemIndex: number) {
     const items = this.formatItems?.slice(startItemIndex, endItemIndex) || [];
 
-    items.forEach((node, index) => {
+    items.forEach(node => {
       const listItem = this.vcr.createEmbeddedView(this.templateHtml, {
-        $implicit: { node, index },
+        $implicit: {
+          node,
+          index: node.id ? this.formatItems.indexOf(node) : null,
+        },
       });
 
       listItem.rootNodes[0].style.height = this.lineHeight + 'px';

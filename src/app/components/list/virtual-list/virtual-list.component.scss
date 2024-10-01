@@ -36,4 +36,17 @@
   .item__has__space {
     visibility: hidden;
   }
+
+  .icon__red {
+    circle {
+      fill: #ED3833 !important;
+
+    }
+  }
+
+  .icon__green {
+    circle {
+      fill: #52C41A !important;
+    }
+  }
 }

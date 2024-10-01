@@ -6,7 +6,6 @@
   <li
     class="list__item"
     [ngStyle]="{
-      'padding-left': !!item.node?.space ? (item.node.space * 16) + 'px' : '0px',
       'visibility': item.node === null ? 'hidden' : 'visible',
     }">
     <div
@@ -20,6 +19,11 @@
           class="flex items-center justify-start w-full p-x-1 rtl:text-right text-gray-900 font-normal gap-3">
           <div
             #boxC
+            [ngStyle]="{
+              'min-width':calcSpace(item.node),
+              'display': 'flex',
+              'justify-content': 'flex-end',
+            }"
             class="flex row justify-start items-center z-10 bg-gray-100">
             <svg-icon
               [class.item__has__space]="!showArrow(item.node)"
@@ -36,9 +40,26 @@
               btnP['offsetWidth'] <
               txtC['offsetWidth'] + boxC['offsetWidth'] + 8
             "
-            class="text-justify text-nowrap z-0"
-            >{{ item.node?.name }}</span
-          >
+            class="text-justify text-nowrap z-0 flex row items-center gap-4"
+            >{{ item.node?.name }}
+            @if (item.node?.sensorType === 'energy'){
+            <svg-icon
+              *ngIf="item.node?.type === 'SENSOR'"
+              class="rotate-0 mr-1"
+              [class.icon__red]="item.node?.status === 'alert'"
+              [class.icon__green]="item.node?.status === 'operating'"
+              src="assets/bolt.svg"></svg-icon>
+            } @if (item.node?.status === 'alert') {
+            <svg-icon
+              *ngIf="
+                item.node?.type === 'SENSOR' || item.node?.status === 'alert'
+              "
+              class="rotate-0 mr-1"
+              [class.icon__red]="item.node?.status === 'alert'"
+              [class.icon__green]="item.node?.status === 'operating'"
+              src="assets/ellipse.svg"></svg-icon>
+            }
+          </span>
         </button>
       </h2>
     </div>

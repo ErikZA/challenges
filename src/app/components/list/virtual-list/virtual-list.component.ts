@@ -61,8 +61,7 @@ export class VirtualListComponent extends AbstractListComponent {
   }
 
   public toggleActiveItem(item: NodeAsset | null, index: number) {
-    console.log('item', item, index);
-    console.time('start-end-1');
+    console.log('ckick', item);
 
     const subNodes = this.subNodes(item).map(s => {
       return {
@@ -80,7 +79,6 @@ export class VirtualListComponent extends AbstractListComponent {
 
       this.removeSubNodes(item);
     }
-    console.timeEnd('start-end-1');
   }
 
   public removeSubNodes(item: NodeAsset | null) {
@@ -117,5 +115,18 @@ export class VirtualListComponent extends AbstractListComponent {
     this.qtdItems = this.formatItems.length;
 
     this.render();
+  }
+
+  public calcSpace(node: NodeAsset | null) {
+    const space = 58;
+
+    if (!node) return '0px';
+    else if (node.space && node.space > 0 && node.space === 1)
+      return `${space}px`;
+    else if (node.space && node.space > 0 && node.space === 2)
+      return `${space + 18}px`;
+    else if (node.space && node.space > 0 && node.space > 2)
+      return `${(node.space + 1) * 0.5 * 48}px`;
+    else return '0px';
   }
 }

@@ -1,6 +1,7 @@
 <div
   class="min-h-full max-w-screen max-h-screen p-6 bg-gray-50 border border-gray-350 mx-2 my-2 rounded-lg shadow overflow-auto smx:h-[90vh]">
-  <app-header [title]="company()?.name"> </app-header>
+  <app-header [title]="company()?.name" (filterEvent)="changeFilter($event)">
+  </app-header>
   <section
     class="flex row justify-between items-stretch px-2 py-1 smx:mx-auto smx:mt-4 smx:max-w-full smx:w-full smx:flex-col">
     <div
@@ -8,6 +9,11 @@
       <app-form></app-form>
       @if (showList) {
       <app-virtual-list [items]="selectedChields()"></app-virtual-list>
+      } @else {
+      <p
+        class="flex justify-center items-center h-12 text-gray-500 text-sm font-medium font-inter">
+        Nenhum ativo encontrado
+      </p>
       }
     </div>
     <app-details

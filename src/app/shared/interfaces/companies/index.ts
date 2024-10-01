@@ -3,8 +3,8 @@ export interface Asset {
   name: string;
   parentId: string | null;
   sensorId: string;
-  sensorType: string;
-  status: string;
+  sensorType: 'energy' | string | null;
+  status: 'alert' | string | null;
   gatewayId: string;
   locationId: string | null;
   space?: number;

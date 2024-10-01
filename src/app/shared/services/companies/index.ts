@@ -11,7 +11,7 @@ import {
 } from '@app/shared/interfaces/companies';
 import { environment } from '@env/environment';
 
-import { delay, ReplaySubject, firstValueFrom } from 'rxjs';
+import { delay, ReplaySubject, firstValueFrom, take, first } from 'rxjs';
 
 import { motorOne, motorThree, motorTwo } from './mock';
 
@@ -20,18 +20,30 @@ import { motorOne, motorThree, motorTwo } from './mock';
 })
 export class CompaniesService {
   private baseUrl = environment.api;
-  private _currentCompany_id: string | null = null;
 
-  public listCompanies$: ReplaySubject<TreeOfAssets> =
-    new ReplaySubject<TreeOfAssets>(1);
-  public listOfLocations$: ReplaySubject<TreeOfAssets> =
-    new ReplaySubject<TreeOfAssets>(1);
-  public listOfAssets$: ReplaySubject<TreeOfAssets> =
-    new ReplaySubject<TreeOfAssets>(1);
+  public listCompanies$ = new ReplaySubject<TreeOfAssets>(1);
+  public listOfLocations$ = new ReplaySubject<TreeOfAssets>(1);
+  public listOfAssets$ = new ReplaySubject<TreeOfAssets>(1);
 
   public isLoading$ = new ReplaySubject<boolean>(1);
 
+  private listOfCriticalAssets: TreeOfAssets | null = null;
+  private listOfEnergyAssets: TreeOfAssets | null = null;
+  private listOfCriticalAndEnergyAssets: TreeOfAssets | null = null;
+
   constructor(private http: HttpClient) {}
+
+  public get criticalAssets() {
+    return this.listOfCriticalAssets;
+  }
+
+  public get energyAssets() {
+    return this.listOfEnergyAssets;
+  }
+
+  public get criticalAndEnergyAssets() {
+    return this.listOfCriticalAndEnergyAssets;
+  }
 
   public listCompanies() {
     return this.http.get<Companies>(`${this.baseUrl}/companies`);
@@ -54,7 +66,6 @@ export class CompaniesService {
         const response = this.buildCompanyTree(companies);
 
         this.listCompanies$.next(response);
-        this.initLists(companies.length);
       })
       .add(() => this.isLoading$.next(false));
   }
@@ -65,14 +76,25 @@ export class CompaniesService {
 
       return;
     }
-    this.isLoading$.next(true);
+    this.resetAssetLists();
+
     this.onLoadLocationsByCompanyId(key);
-    this.listOfLocations$.subscribe(() => this.onLoadAssetsByCompanyId(key));
+
+    this.isLoading$.next(true);
+    this.listOfLocations$
+      .pipe(first())
+      .subscribe(() => this.onLoadAssetsByCompanyId(key));
+  }
+
+  private resetAssetLists() {
+    this.listOfCriticalAssets = null;
+    this.listOfEnergyAssets = null;
+    this.listOfCriticalAndEnergyAssets = null;
   }
 
   private onLoadLocationsByCompanyId(key: string) {
     this.getLocationsByCompanyId(key).subscribe(l => {
-      this.listCompanies$.subscribe(companies => {
+      this.listCompanies$.pipe(take(1)).subscribe(companies => {
         const { locations, subLocations } = this.categorizeLocations(l);
 
         this.populateLocations(locations, companies, key);
@@ -109,7 +131,7 @@ export class CompaniesService {
   private onLoadAssetsByCompanyId(key: string) {
     this.getAssetsByCompanyId(key)
       .subscribe(assets => {
-        this.listCompanies$.subscribe(companies => {
+        this.listCompanies$.pipe(take(1)).subscribe(companies => {
           console.time('start-end');
 
           const {
@@ -176,11 +198,6 @@ export class CompaniesService {
     }, {} as TreeOfAssets);
   }
 
-  private initLists(size: number) {
-    // this.listOfLocations$ = new ReplaySubject<TreeOfAssets>(size);
-    // this.listOfAssets$ = new ReplaySubject<TreeOfAssets>(size);
-  }
-
   private populateLocationAssets(
     assets: Assets,
     companies: TreeOfAssets,
@@ -209,10 +226,123 @@ export class CompaniesService {
 
       node[asset.id] = { ...asset, children: {}, type };
 
+      this.updateFilteredList(asset, companies, key, keys, node);
+
       return true;
     } else {
       return false;
     }
+  }
+
+  private updateFilteredList(
+    asset: Asset,
+    companies: TreeOfAssets,
+    key: string,
+    keys: string[],
+    node: TreeOfAssets
+  ) {
+    if (asset.sensorType === 'energy')
+      this.updateEnergyAssetsList(asset, companies, key, [...keys], node);
+
+    if (asset.status === 'alert')
+      this.updateListOfCriticalAssets(asset, companies, key, [...keys], node);
+
+    if (asset.sensorType === 'energy' && asset.status === 'alert') {
+      this.updateListOfCriticalAndEnergyAssets(
+        asset,
+        companies,
+        key,
+        [...keys],
+        node
+      );
+    }
+  }
+
+  private updateListOfCriticalAndEnergyAssets(
+    asset: Asset,
+    companies: TreeOfAssets,
+    key: string,
+    keys: string[],
+    node: TreeOfAssets
+  ) {
+    this.listOfCriticalAndEnergyAssets = {
+      ...this.listOfCriticalAndEnergyAssets,
+      ...this.pickFilteredAsset(
+        this.listOfCriticalAndEnergyAssets,
+        companies[key].children,
+        keys,
+        node[asset.id]
+      ),
+    };
+  }
+
+  private updateEnergyAssetsList(
+    asset: Asset,
+    companies: TreeOfAssets,
+    key: string,
+    keys: string[],
+    node: TreeOfAssets
+  ) {
+    this.listOfEnergyAssets = {
+      ...this.listOfEnergyAssets,
+      ...this.pickFilteredAsset(
+        this.listOfEnergyAssets,
+        companies[key].children,
+        keys,
+        node[asset.id]
+      ),
+    };
+  }
+
+  private updateListOfCriticalAssets(
+    asset: Asset,
+    companies: TreeOfAssets,
+    key: string,
+    keys: string[],
+    node: TreeOfAssets
+  ) {
+    this.listOfCriticalAssets = {
+      ...this.listOfCriticalAssets,
+      ...this.pickFilteredAsset(
+        this.listOfCriticalAssets,
+        companies[key].children,
+        keys,
+        node[asset.id]
+      ),
+    };
+  }
+
+  private pickFilteredAsset(
+    listOfAsset: TreeOfAssets | null,
+    rootNode: TreeOfAssets,
+    keys: string[],
+    asset: NodeAsset
+  ) {
+    let nextRootNode = rootNode;
+    let memoryFilteredNode = listOfAsset;
+
+    keys.forEach((k, i, arr) => {
+      if (!listOfAsset) {
+        listOfAsset = {
+          [k]: { ...nextRootNode[k], children: {} },
+        } as TreeOfAssets;
+        memoryFilteredNode = listOfAsset;
+      } else if (!!listOfAsset && !listOfAsset[k] && !!nextRootNode) {
+        listOfAsset[k] = {
+          ...nextRootNode[k],
+          children: {},
+        };
+      }
+
+      if (i === arr.length - 1 && listOfAsset && i !== 0) {
+        listOfAsset[k].children[asset.id as string] = asset;
+      }
+
+      nextRootNode = nextRootNode[k].children;
+      listOfAsset = listOfAsset ? listOfAsset[k].children : null;
+    });
+
+    return memoryFilteredNode;
   }
 
   private getKeyOfNodesOfChild(arg0: NodeAsset, index: string): string[] {
@@ -237,11 +367,20 @@ export class CompaniesService {
     key: string
   ) {
     assets.forEach(sensor => {
-      companies[key].children[sensor.id] = {
+      const asset = {
         ...sensor,
         children: {},
         type: 'SENSOR',
       };
+
+      companies[key].children[sensor.id] = asset as NodeAsset;
+      this.updateFilteredList(
+        sensor,
+        companies,
+        key,
+        [sensor.id],
+        companies[key].children[sensor.id] as any
+      );
     });
   }
 
