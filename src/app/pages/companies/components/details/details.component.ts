@@ -23,11 +23,7 @@ export class DetailsComponent {
   private companiesService = inject(CompaniesService);
 
   private async loadAsset(asset: NodeAsset) {
-    const response = await this.companiesService.searchMockedAssets(
-      asset.id || ''
-    );
-
-    this.sensorData.set({ ...response, ...asset });
+    // todo: implement this method
   }
 
   public get assetDataInfo() {

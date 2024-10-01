@@ -1,27 +1,36 @@
-# TractianChallenger
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.1.2.
+# TractianChallenger roteiro de desenvolvimento
 
-## Development server
+## Ferramental
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+- Node.js - Base para o desenvolvimento
 
-## Code scaffolding
+- Angular - Framework para o desenvolvimento
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+- scss - Pré-processador de CSS
 
-## Build
+- TailwindCSS - Framework de CSS para estilização
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+- RxJS - Biblioteca para programação reativa
 
-## Running unit tests
+- angular-svg-icon - Biblioteca para manipulação de SVG
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+- Lint - Ferramenta para padronização de código
 
-## Running end-to-end tests
+- Prettier - Ferramenta para padronização de código
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+- Husky - Ferramenta para execução de scripts antes de commits
 
-## Further help
+## Pontos de melhoria
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- Usar um WebWorker para processar os dados de forma assíncrona e não bloquear a thread principal do navegador por muito tempo.
+
+- Converter a lista em filestream para quebrar a lista em chunks menores e processar os dados de forma mais eficiente. (Validar se é possível devido ao comportamento de links da API)
+
+- Adicionar um sistema de cache para armazenar os dados processados e não precisar processar os dados novamente. (Validar se é possível conforme o comportamento de atualização dos dados da API)
+
+- Adicionar testes unitários
+
+- Adicionar testes de integração
+
+- Adicionar testes e2e

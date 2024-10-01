@@ -5,4 +5,9 @@
     height: 80vh !important;
     overflow: auto;
   }
+
+  app-form:has(.form__error) {
+    height: 60px;
+  }
+
 }

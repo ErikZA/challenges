@@ -1,4 +1,8 @@
-<form [formGroup]="form" class="flex">
+<form
+  [formGroup]="form"
+  class="flex"
+  [class.form__error]="formHasError"
+  (ngSubmit)="submit()">
   <div class="relative w-full border-b border-b-gray-350 border-solid">
     <input
       type="search"
@@ -22,12 +26,12 @@
         form.controls.search.hasError('required') &&
         form.controls.search.touched
       "
-      class="absolute top-15 end-15 text-red-200 text-xs"
+      class="absolute top-15 end-15 text-red-200 text-xs left-2"
       >Campo obrigatório</span
     >
     <span
       *ngIf="form.controls.search.hasError('minlength')"
-      class="absolute top-15 end-15 text-red-200 text-xs"
+      class="absolute top-15 end-15 text-red-200 text-xs left-2"
       >Mínimo de 3 caracteres</span
     >
   </div>

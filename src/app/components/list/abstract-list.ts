@@ -6,15 +6,13 @@ import {
   ElementRef,
   EmbeddedViewRef,
   inject,
-  Input,
-  OnChanges,
   OnDestroy,
-  SimpleChanges,
   TemplateRef,
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
 import { NodeAsset, TreeOfAssets } from '@app/shared/interfaces/companies';
+import { ActiveFilter } from '@app/shared/interfaces/core/menu.interface';
 
 export interface Context {
   $implicit: { node: NodeAsset | null; index: number | null };
@@ -25,9 +23,7 @@ export interface Context {
   imports: [CommonModule],
   template: ``,
 })
-export class AbstractListComponent
-  implements AfterViewInit, OnDestroy, OnChanges
-{
+export class AbstractListComponent implements AfterViewInit, OnDestroy {
   @ViewChild('templateHtml', { static: true, read: TemplateRef })
   public templateHtml!: TemplateRef<Context>;
   @ViewChild('virtual_list')
@@ -36,18 +32,18 @@ export class AbstractListComponent
   @ViewChild('vcr', { static: true, read: ViewContainerRef })
   public vcr!: ViewContainerRef;
 
-  @Input({ required: true }) public items: TreeOfAssets | NodeAsset | null =
-    null;
+  protected _searchWord = '';
+  protected _activeFilter: ActiveFilter | null = null;
+  protected _items: TreeOfAssets | NodeAsset | null = null;
 
-  public async ngOnChanges(changes: SimpleChanges) {
-    const nodes = changes['items'].currentValue as
-      | TreeOfAssets
-      | NodeAsset
-      | null;
+  protected selectedIds = new Set<string>();
 
+  protected resetItens(nodes: NodeAsset | TreeOfAssets | null) {
     this.itemsAsNodeAsset(nodes).then(items => {
       this.formatItems = items;
+      this.originalFormatItems = items;
       this.qtdItems = this.formatItems.length;
+      this.qtdOriginalItems = this.qtdItems;
       this.render();
     });
   }
@@ -67,13 +63,15 @@ export class AbstractListComponent
   }
 
   public formatItems: NodeAsset[] = [];
+  public originalFormatItems: NodeAsset[] = [];
 
   public qtdItems = 0;
+  public qtdOriginalItems = 0;
 
   private embeddedViewRefs: EmbeddedViewRef<Context>[] = [];
   private cdr = inject(ChangeDetectorRef);
   private lineHeight = 36;
-  private limit = 15;
+  private limit = 18;
   protected visibleHeight = this.limit * this.lineHeight;
 
   private scrollTop = 0;

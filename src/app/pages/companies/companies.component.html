@@ -6,9 +6,12 @@
     class="flex row justify-between items-stretch px-2 py-1 smx:mx-auto smx:mt-4 smx:max-w-full smx:w-full smx:flex-col">
     <div
       class="lg:w-4/12 md:w-6/12 bg-white border border-gray-200 rounded-sm mt-3 smx:w-full md:mr-2">
-      <app-form></app-form>
+      <app-form (onSearch)="onSubmit($event)"></app-form>
       @if (showList) {
-      <app-virtual-list [items]="selectedChields()"></app-virtual-list>
+      <app-virtual-list
+        [items]="selectedChields()"
+        [searchWord]="searchWord()"
+        [activeFilter]="activeFilter()"></app-virtual-list>
       } @else {
       <p
         class="flex justify-center items-center h-12 text-gray-500 text-sm font-medium font-inter">

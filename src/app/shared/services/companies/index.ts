@@ -13,8 +13,6 @@ import { environment } from '@env/environment';
 
 import { delay, ReplaySubject, firstValueFrom, take, first } from 'rxjs';
 
-import { motorOne, motorThree, motorTwo } from './mock';
-
 @Injectable({
   providedIn: 'root',
 })
@@ -27,8 +25,19 @@ export class CompaniesService {
 
   public isLoading$ = new ReplaySubject<boolean>(1);
 
+  /**
+   * @description List of assets filtered by critical status
+   */
   private listOfCriticalAssets: TreeOfAssets | null = null;
+
+  /**
+   * @description List of assets filtered by energy sensor type
+   */
   private listOfEnergyAssets: TreeOfAssets | null = null;
+
+  /**
+   * @description List of assets filtered by critical status and energy sensor type
+   */
   private listOfCriticalAndEnergyAssets: TreeOfAssets | null = null;
 
   constructor(private http: HttpClient) {}
@@ -59,6 +68,10 @@ export class CompaniesService {
     return this.http.get<Assets>(`${this.baseUrl}/companies/${id}/assets`);
   }
 
+  /**
+   * @description Load companies and populate the list of companies;
+   * @summary This method loads the list of companies, this companies will be used to populate the header of the page.
+   */
   public loadCompanies() {
     this.isLoading$.next(true);
     this.listCompanies()
@@ -70,6 +83,12 @@ export class CompaniesService {
       .add(() => this.isLoading$.next(false));
   }
 
+  /**
+   * @description Load assets and locations by company id;
+   * @summary This method receives a company id and load the locations and assets of this company.
+   * It will show a alert if the company id is not provided. It will also reset the asset lists.
+   * It will populate the list of locations and assets.
+   * */
   public onLoadAssets(key?: string | null) {
     if (!key) {
       alert('Please select a company');
@@ -86,12 +105,20 @@ export class CompaniesService {
       .subscribe(() => this.onLoadAssetsByCompanyId(key));
   }
 
+  /**
+   * @description Reset the asset lists;
+   * @summary This method reset the list of critical assets, energy assets and critical and energy assets.
+   */
   private resetAssetLists() {
     this.listOfCriticalAssets = null;
     this.listOfEnergyAssets = null;
     this.listOfCriticalAndEnergyAssets = null;
   }
 
+  /**
+   * @description Load locations by company id; This method receives a company id and load the locations of this company.
+   * @summary When the locations are loaded, it will categorize the locations into locations and sub-locations.
+   */
   private onLoadLocationsByCompanyId(key: string) {
     this.getLocationsByCompanyId(key).subscribe(l => {
       this.listCompanies$.pipe(take(1)).subscribe(companies => {
@@ -106,34 +133,18 @@ export class CompaniesService {
     });
   }
 
-  public async searchMockedAssets(value: string) {
-    this.isLoading$.next(true);
-
-    let result;
-
-    if (value.endsWith('a') || value.endsWith('d') || value.endsWith('f')) {
-      result = firstValueFrom(motorOne.pipe(delay(1000)));
-    } else if (
-      value.endsWith('1') ||
-      value.endsWith('2') ||
-      value.endsWith('3')
-    ) {
-      result = firstValueFrom(motorTwo.pipe(delay(2000)));
-    } else {
-      result = firstValueFrom(motorThree.pipe(delay(3000)));
-    }
-
-    this.isLoading$.next(false);
-
-    return result as unknown as NodeAsset;
-  }
-
+  /**
+   * @description Load assets by company id; This method receives a company id and load the assets of this company.
+   * @summary When the assets are loaded, it will filter the assets into assets with parent, assets with location, sensors without location and sensors with location.
+   * After that, it will populate the sensors without location,
+   * the location assets, the assets parents and the sensors with location.
+   */
   private onLoadAssetsByCompanyId(key: string) {
-    this.getAssetsByCompanyId(key)
-      .subscribe(assets => {
-        this.listCompanies$.pipe(take(1)).subscribe(companies => {
-          console.time('start-end');
-
+    this.getAssetsByCompanyId(key).subscribe(assets => {
+      this.listCompanies$
+        .pipe(take(1))
+        .pipe(delay(500))
+        .subscribe(companies => {
           const {
             sensorWithoutLocation,
             assetsWithLocation,
@@ -152,14 +163,16 @@ export class CompaniesService {
           this.populateAssetsParents(assetsWithParent, companies, key);
 
           this.populateSensors(sensorWithLocation, companies, key);
-
-          console.timeEnd('start-end');
           this.listOfAssets$.next(companies);
-        });
-      })
-      .add(() => this.isLoading$.next(false));
+        })
+        .add(() => this.isLoading$.next(false));
+    });
   }
 
+  /**
+   * @description Populate sensors; This method receives a list of sensors and populate the sensors into the companies tree.
+   * @summary Using the method populateNode, it will populate the sensors into the companies tree.
+   */
   private populateSensors(
     assets: Assets,
     companies: TreeOfAssets,
@@ -190,6 +203,10 @@ export class CompaniesService {
     );
   }
 
+  /**
+   * @description Build a tree of companies;
+   * @summary This method receives a list of companies and transform it into a tree of companies that are composed an hash that is the key of the company and the value is the company itself.
+   * */
   private buildCompanyTree(companies: Companies) {
     return companies.reduce((acc, company) => {
       acc[company.id] = { ...company, children: {}, type: 'COMPANY' };
@@ -208,6 +225,11 @@ export class CompaniesService {
     );
   }
 
+  /**
+   * @description Populate a node; This method receives a node and call the recursive getKeyOfNodesOfChild method to get the keys of the nodes util the index is found.
+   * @summary If the path is found, the node will be inserted into the companies tree and the filtered lists will be updated.
+   * If the keys are not found, the node will not be inserted into the companies tree.
+   */
   private populateNode(
     companies: TreeOfAssets,
     key: string,
@@ -345,6 +367,9 @@ export class CompaniesService {
     return memoryFilteredNode;
   }
 
+  /**
+   * @description The method receives a root node and an index and return the keys of the nodes that are children of the root node.
+   */
   private getKeyOfNodesOfChild(arg0: NodeAsset, index: string): string[] {
     for (const key in arg0.children) {
       if (key === index) {

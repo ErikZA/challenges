@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { AbstractListComponent } from '@app/components/list/abstract-list';
 import { NodeAsset, TreeOfAssets } from '@app/shared/interfaces/companies';
+import { ActiveFilter } from '@app/shared/interfaces/core/menu.interface';
+import { CompaniesService } from '@app/shared/services/companies';
 
 import { SvgIconComponent } from 'angular-svg-icon';
 
@@ -13,10 +15,49 @@ import { SvgIconComponent } from 'angular-svg-icon';
   styleUrl: './virtual-list.component.scss',
 })
 export class VirtualListComponent extends AbstractListComponent {
-  private selectedIds = new Set<string>();
+  @Input({ required: true }) public set searchWord(word: string) {
+    this._searchWord = word;
+    this.selectedIds.clear();
+    this.updateSearchResults(word);
+  }
+
+  @Input() public set activeFilter(active: ActiveFilter | null) {
+    setTimeout(() => {
+      this._activeFilter = active;
+      this.selectedIds.clear();
+      this.updateSearchResults(this._searchWord);
+    }, 200);
+  }
+
+  @Input({ required: true }) public set items(
+    nodes: TreeOfAssets | NodeAsset | null
+  ) {
+    this.selectedIds.clear();
+    this._items = nodes;
+    this.resetItens(nodes);
+    this.updateSearchResults(this._searchWord);
+  }
+
+  private companiesService = inject(CompaniesService);
 
   constructor() {
     super();
+  }
+
+  protected updateSearchResults(word: string) {
+    if (
+      (!word || word.length < 3) &&
+      this.qtdOriginalItems !== this.formatItems.length
+    ) {
+      this.resetItens(this._items);
+    } else if (!!word && word.length >= 3) {
+      this.companiesService.isLoading$.next(true);
+      setTimeout(() => {
+        this.filterNodesBySearchWord().finally(() =>
+          this.companiesService.isLoading$.next(false)
+        );
+      }, 0);
+    }
   }
 
   public subNodes(node: NodeAsset | null) {
@@ -61,8 +102,6 @@ export class VirtualListComponent extends AbstractListComponent {
   }
 
   public toggleActiveItem(item: NodeAsset | null, index: number) {
-    console.log('ckick', item);
-
     const subNodes = this.subNodes(item).map(s => {
       return {
         ...s,
@@ -115,6 +154,50 @@ export class VirtualListComponent extends AbstractListComponent {
     this.qtdItems = this.formatItems.length;
 
     this.render();
+  }
+
+  private async filterNodesBySearchWord(nodesArray = this.originalFormatItems) {
+    this.formatItems = await this.recursiveFilterNodesBySearchWord(nodesArray);
+
+    this.qtdItems = this.formatItems.length;
+
+    this.render();
+  }
+
+  private async recursiveFilterNodesBySearchWord(
+    nodesArray: NodeAsset[]
+  ): Promise<NodeAsset[]> {
+    return nodesArray.reduce<Promise<NodeAsset[]>>(async (accPromise, node) => {
+      const acc = await accPromise;
+      const subNodes = this.subNodes(node);
+
+      if (subNodes.length) {
+        const filteredSubNodes = await this.recursiveFilterNodesBySearchWord(
+          subNodes as unknown as NodeAsset[]
+        );
+
+        if (filteredSubNodes.length) {
+          return [
+            ...acc,
+            { ...node, children: filteredSubNodes as unknown as TreeOfAssets },
+          ];
+        } else if (this.searchWordInNode(node)) {
+          return [...acc, node];
+        }
+      } else if (this.searchWordInNode(node)) {
+        return [...acc, node];
+      }
+
+      return acc;
+    }, Promise.resolve([] as NodeAsset[]));
+  }
+
+  private searchWordInNode(node: NodeAsset) {
+    return (
+      node?.name?.toLowerCase().includes(this._searchWord.toLowerCase()) ||
+      (!!node.sensorId &&
+        node.sensorId.toLowerCase().includes(this._searchWord.toLowerCase()))
+    );
   }
 
   public calcSpace(node: NodeAsset | null) {

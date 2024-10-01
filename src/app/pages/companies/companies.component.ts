@@ -32,14 +32,14 @@ import { HeaderComponent } from './components/header/header.component';
   styleUrl: './companies.component.scss',
 })
 export class CompaniesComponent implements OnInit {
-  private companiesService = inject(CompaniesService);
   public selectedCompany = signal<string | null>(null);
   public selectedChields = signal<TreeOfAssets | null>(null);
-
+  public searchWord = signal<string>('');
   public company = signal<NodeAsset | null>(null);
-  private activeFilter = signal<ActiveFilter | null>(null);
+  public activeFilter = signal<ActiveFilter | null>(null);
 
   private router = inject(ActivatedRoute);
+  private companiesService = inject(CompaniesService);
 
   public async ngOnInit() {
     this.onCurrentCompany();
@@ -75,7 +75,6 @@ export class CompaniesComponent implements OnInit {
       this.selectedChields.set(null);
       if (!this.company()?.id) return;
 
-      // this.selectedChields.set(await this.chieldsOfCompany);
       await this.changeFilter(this.activeFilter());
     });
   }
@@ -121,7 +120,7 @@ export class CompaniesComponent implements OnInit {
     }
   }
 
-  public onSubmit() {
-    console.log('Submit');
+  public onSubmit(props: { search: string }) {
+    this.searchWord.set(props.search);
   }
 }

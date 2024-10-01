@@ -1,20 +1,26 @@
 <ul class="list__view" #virtual_list>
   <ng-container #vcr></ng-container>
+  @if(qtdItems === 0) {
+  <div>
+    <p class="text-center text-gray-500 text-sm font-medium font-inter">
+      Nenhum ativo encontrado
+    </p>
+  </div>
+  }
 </ul>
 
 <ng-template #templateHtml let-item>
   <li
+    (click)="toggleActiveItem(item.node, item.index)"
     class="list__item"
     [ngStyle]="{
       'visibility': item.node === null ? 'hidden' : 'visible',
     }">
     <div
-      class="w-full min-h-full bg-gray-50 hover:bg-gray-100 hover:border hover:border-gray-200"
-      data-accordion="collapse">
+      class="w-full min-h-full bg-gray-50 hover:bg-gray-100 hover:border hover:border-gray-200">
       <h2>
         <button
           #btnP
-          (click)="toggleActiveItem(item.node, item.index)"
           type="button"
           class="flex items-center justify-start w-full p-x-1 rtl:text-right text-gray-900 font-normal gap-3">
           <div
