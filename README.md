@@ -34,3 +34,13 @@
 - Adicionar testes de integração
 
 - Adicionar testes e2e
+
+# Projeto Link
+
+[TractianChallenger](https://challenges-gilt.vercel.app/)
+
+# Video de Demonstração
+
+Obs: O vídeo ficou com as cores distorcidas, mas é possível ver o funcionamento do projeto.
+
+[Video](https://youtu.be/Ulitf_Lofvc)
